@@ -4,8 +4,8 @@ A faster > ? < knock off of Lqpletsp/GALang. It's meant to replicate some behavi
 ## Usage
 Build by running `./build.sh` in any POSIX-compliant shell with your working directory being the cloned directory.
 
-[!NOTE]
-`build.sh` should warn you about unmet dependencies, and will create a build directory to store the compiled binaries.
+> [!NOTE]
+> `build.sh` should warn you about unmet dependencies, and will create a build directory to store the compiled binaries.
 
 Run the demo file with `./build/src.main fib.slang`.
 
@@ -43,15 +43,15 @@ exit
 
 ### Basic Syntax
 Each operation is written as 
-
-`[ operation ] [ operand, ...] [ operand, ... ] [ OR MORE OPERANDS ]`
+> `[ operation ] [ operand, ...] [ operand, ... ] [ OR MORE OPERANDS ]`
 
 For general operations like add, set, out, outch, it performs the operations on corresponding elements of the operands, so 
-
-`add 1, 2, 3 2 x, y, z` will add 2 to 1, 2, 3 and store them to x, y, z correspondingly.
+> `add 1, 2, 3 2 x, y, z`
+will add 2 to 1, 2, 3 and store them to x, y, z correspondingly.
 
 `decf` defines a function, and is ignored unless called explicitly using `call`. 
 
 `decl` defines a label, and the second parameter specifies the offset from the label's position. This is typically used along with `cmp{x}` to perform complex logic.
 
-Currently, `outch` expects the ascii code of a character and displays that, but the behaviour will probably change as time passes.
+> [!NOTE]
+> Currently, `outch` expects the ascii code of a character and displays that, but the behaviour will probably change as time passes.
