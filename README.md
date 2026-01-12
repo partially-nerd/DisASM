@@ -1,5 +1,5 @@
 # DisASM
-A faster > ? < knock off of Lqpletsp/GALang. It's meant to replicate some behaviour of assembly, but is capable of performing multiple operations in the same clock-cycle due to the comma syntax, and the main difference from GALang being a slight change of syntax to make the interpreter a one-pass system, and that it's written in cpp
+A faster > ? < knock off of Lqpletsp/GALang. It's meant to replicate some behaviour of assembly, but is capable of performing multiple operations in the same clock-cycle due to the comma syntax, with the main difference from GALang being a slight change of syntax to make the interpreter a one-pass system, and that it's written in cpp
 
 ## Usage
 Build by running `./build.sh` in any POSIX-compliant shell with your working directory being the cloned directory.
@@ -43,10 +43,10 @@ exit
 
 ### Basic Syntax
 Each operation is written as 
-> `[ operation ] [ operand, ...] [ operand, ... ] [ OR MORE OPERANDS ]`
+> [ operation ] [ operand, ...] [ operand, ... ] [ OR MORE OPERANDS ]
 
 For general operations like add, set, out, outch, it performs the operations on corresponding elements of the operands, so 
-> `add 1, 2, 3 2 x, y, z`
+> add 1, 2, 3 2 x, y, z
 will add 2 to 1, 2, 3 and store them to x, y, z correspondingly.
 
 `decf` defines a function, and is ignored unless called explicitly using `call`. 
