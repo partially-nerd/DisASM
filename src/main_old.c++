@@ -6,24 +6,18 @@
 
 using namespace std;
 
-#define maxStackSize 20
-#define DEBUG false
+#define maxStackSize 50
 
 vector<string> split(string s) {
   s += ", ";
   vector<string> ret;
   char prev_ch = ',';
   int last_enc = 0;
-  bool in_str = false;
 
   for (int i = 0; i < s.size(); i++) {
     char ch = s[i];
 
-    if (ch == '"') {
-      in_str = !in_str;
-    }
-
-    if (ch == ' ' && prev_ch == ',' && !in_str) {
+    if (ch == ' ' && prev_ch == ',') {
       ret.push_back(s.substr(last_enc, i - last_enc - 1));
       // cout << s.substr(last_enc, i - last_enc - 1) << endl;
       last_enc = i + 1;
@@ -41,7 +35,7 @@ int allocSize(string s) {
   }
 
   if (s == "str") {
-    return 32;
+    return 255;
   }
 
   if (s == "fn") {
@@ -85,24 +79,7 @@ void expandP2(vector<string> &p1, vector<string> &p2) {
   }
 }
 
-void expandP2(vector<int> &p1, vector<int> &p2) {
-  if (p2.size() == 1) {
-    int val = p2[0];
-    p2.pop_back();
-    for (int _ : p1) {
-      p2.push_back(val);
-    }
-  }
-}
-
 void checkSizeP1P2(vector<string> &p1, vector<string> &p2) {
-  if (p1.size() != p2.size()) {
-    cerr << "Syntax error: size mismatch." << endl;
-    return;
-  }
-}
-
-void checkSizeP1P2(vector<int> &p1, vector<int> &p2) {
   if (p1.size() != p2.size()) {
     cerr << "Syntax error: size mismatch." << endl;
     return;
@@ -172,27 +149,15 @@ string getMostRecentStackWhereVariableExists(string varName,
   return "";
 }
 
-vector<int> getValueOfSymbol(string a, vector<keyVal> &memory,
-                             vector<string> &currentStack) {
-  vector<int> valA;
+int getValueOfSymbol(string a, vector<keyVal> &memory,
+                     vector<string> &currentStack) {
+  int valA;
   if (canBeInt(a)) {
-    valA.push_back(stoi(a));
-  } else if (a[0] == '"' && a.back() == '"') {
-    string valAval = a.substr(1, a.length() - 2);
-    for (auto ch : valAval) {
-      valA.push_back((int)ch);
-    }
+    valA = stoi(a);
   } else {
     string valAName =
         getMostRecentStackWhereVariableExists(a, memory, currentStack);
-    int i = getPositionWhereKeyOccursInDict(valAName, memory);
-    while (i < memory.size()) {
-      valA.push_back(memory[i].val);
-      i++;
-      if (memory[i].key != "") {
-        break;
-      }
-    }
+    valA = memory[getPositionWhereKeyOccursInDict(valAName, memory)].val;
   }
   return valA;
 }
@@ -201,105 +166,23 @@ void set(string variable, string value, vector<keyVal> &memory,
          vector<string> &currentStack) {
   string var =
       getMostRecentStackWhereVariableExists(variable, memory, currentStack);
-  auto val = getValueOfSymbol(value, memory, currentStack);
-  int i = getPositionWhereKeyOccursInDict(var, memory);
-  int c = 0;
-  while (i < memory.size()) {
-    if (c < val.size()) {
-      memory[i].val = val[c];
-    } else {
-      memory[i].val = 0;
-    }
-
-    if (DEBUG) {
-      cout << "c = " << c << ", val[c] = " << val[c]
-           << ", and val.size() = " << val.size() << endl;
-    }
-
-    i++;
-    c++;
-
-    if (memory[i].key != "") {
-      break;
-    }
-  }
+  int val = getValueOfSymbol(value, memory, currentStack);
+  int indexInMemory = getPositionWhereKeyOccursInDict(var, memory);
+  memory[indexInMemory].val = val;
 }
 
 void add(string a, string b, string storeAt, vector<keyVal> &memory,
          vector<string> &currentStack) {
-  auto valA = getValueOfSymbol(a, memory, currentStack);
-  auto valB = getValueOfSymbol(b, memory, currentStack);
-
-  expandP2(valA, valB);
-  checkSizeP1P2(valA, valB);
-
-  string var =
-      getMostRecentStackWhereVariableExists(storeAt, memory, currentStack);
-
-  int i = getPositionWhereKeyOccursInDict(var, memory);
-  int c = 0;
-
-  while (i < memory.size()) {
-    memory[i].val = valA[c] + valB[c];
-    i++;
-    c++;
-    if (DEBUG) {
-      cout << "valA[c] = " << valA[c] << ", and valA.size() = " << valA.size()
-           << endl;
-      cout << "valB[c] = " << valB[c] << ", and valB.size() = " << valB.size()
-           << endl;
-    }
-    if (c >= valA.size()) {
-      break;
-    }
-    if (memory[i].key != "") {
-      break;
-    }
-  }
-}
-
-void multiply(string a, string b, string storeAt, vector<keyVal> &memory,
-              vector<string> &currentStack) {
-  auto valA = getValueOfSymbol(a, memory, currentStack);
-  auto valB = getValueOfSymbol(b, memory, currentStack);
-
-  expandP2(valA, valB);
-  checkSizeP1P2(valA, valB);
-
-  string var =
-      getMostRecentStackWhereVariableExists(storeAt, memory, currentStack);
-
-  int i = getPositionWhereKeyOccursInDict(var, memory);
-  int c = 0;
-
-  while (i < memory.size()) {
-    memory[i].val = valA[c] * valB[c];
-    i++;
-    c++;
-    if (DEBUG) {
-      cout << "valA[c] = " << valA[c] << ", and valA.size() = " << valA.size()
-           << endl;
-      cout << "valB[c] = " << valB[c] << ", and valB.size() = " << valB.size()
-           << endl;
-    }
-    if (c >= valA.size()) {
-      break;
-    }
-    if (memory[i].key != "") {
-      break;
-    }
-  }
+  int valA = getValueOfSymbol(a, memory, currentStack);
+  int valB = getValueOfSymbol(b, memory, currentStack);
+  string sum = to_string(valA + valB);
+  set(storeAt, sum, memory, currentStack);
 }
 
 void printMemory(vector<keyVal> &memory) {
   for (auto kv : memory) {
-    if (kv.key != "") {
-      cout << endl << kv.key << " = " << kv.val;
-    } else {
-      cout << ", " << kv.val;
-    }
+    cout << kv.key << " = " << kv.val << endl;
   }
-  cout << endl;
 }
 
 int main(int argc, char *argv[]) {
@@ -324,8 +207,6 @@ int main(int argc, char *argv[]) {
     char prev_ch;
     int last_enc = 0;
 
-    bool in_str = false;
-
     if (line[0] == '/' && line[1] == '/') {
       continue;
     }
@@ -335,11 +216,7 @@ int main(int argc, char *argv[]) {
     for (int i = 0; i < line.size(); i++) {
       char ch = line[i];
 
-      if (ch == '"') {
-        in_str = !in_str;
-      }
-
-      if (ch == ' ' && prev_ch != ',' && !in_str) {
+      if (ch == ' ' && prev_ch != ',') {
         tokens.push_back(line.substr(last_enc, i - last_enc));
         last_enc = i + 1;
       }
@@ -359,6 +236,7 @@ int main(int argc, char *argv[]) {
   // execution pass
 
   bool skip = false;
+  bool DEBUG = false;
   string previousCommand;
   string scopeNameOfOutOfFunctionDefinition;
   vector<string> functionParameters;
@@ -461,10 +339,10 @@ int main(int argc, char *argv[]) {
 
       for (auto var : split(instruction[2])) {
         functionParameters.push_back(
-            to_string(getValueOfSymbol(var, memory, currentStack)[0]));
+            to_string(getValueOfSymbol(var, memory, currentStack)));
       }
 
-      auto fnIsAt = getValueOfSymbol(fn, memory, currentStack)[0];
+      auto fnIsAt = getValueOfSymbol(fn, memory, currentStack);
 
       if (DEBUG) {
         cout << "Call found " << fn << " at " << fnIsAt << endl;
@@ -483,7 +361,7 @@ int main(int argc, char *argv[]) {
 
     else if (command == "decl") {
       auto lName = instruction[1];
-      auto offset = getValueOfSymbol(instruction[2], memory, currentStack)[0];
+      auto offset = getValueOfSymbol(instruction[2], memory, currentStack);
 
       decv(lName, "lbl", memory, currentStack);
       set(lName, to_string(PC + offset), memory, currentStack);
@@ -496,16 +374,11 @@ int main(int argc, char *argv[]) {
       checkSizeP1P2(p1, p2);
 
       for (int p = 0; p < p1.size(); p++) {
-        auto valA = getValueOfSymbol(p1[p], memory, currentStack);
-        auto valB = getValueOfSymbol(p2[p], memory, currentStack);
-        expandP2(valA, valB);
-        checkSizeP1P2(valA, valB);
+        int valA = getValueOfSymbol(p1[p], memory, currentStack);
+        int valB = getValueOfSymbol(p2[p], memory, currentStack);
 
-        for (int v = 0; v < valA.size(); v++) {
-
-          if (valA[v] == valB[v]) {
-            PC = getValueOfSymbol(instruction[3], memory, currentStack)[0];
-          }
+        if (valA == valB) {
+          PC = getValueOfSymbol(instruction[3], memory, currentStack);
         }
       }
     }
@@ -528,10 +401,8 @@ int main(int argc, char *argv[]) {
       auto p1 = split(instruction[1]);
 
       for (int p = 0; p < p1.size(); p++) {
-        auto value = getValueOfSymbol(p1[p], memory, currentStack);
-        for (auto val : value) {
-          cout << val;
-        }
+        int value = getValueOfSymbol(p1[p], memory, currentStack);
+        cout << value;
       }
     }
 
@@ -539,95 +410,8 @@ int main(int argc, char *argv[]) {
       auto p1 = split(instruction[1]);
 
       for (int p = 0; p < p1.size(); p++) {
-        auto value = getValueOfSymbol(p1[p], memory, currentStack);
-        for (auto val : value) {
-          cout << static_cast<char>(val);
-        }
-      }
-    }
-
-    else if (command == "low") {
-      auto p1 = split(instruction[1]);
-
-      for (int p = 0; p < p1.size(); p++) {
-        auto value = getValueOfSymbol(p1[p], memory, currentStack);
-        string str = "\"";
-        str.reserve(value.size() + 2);
-        for (auto val : value) {
-          str.push_back(tolower(static_cast<char>(val)));
-        }
-        str.push_back('"');
-        set(p1[p], str, memory, currentStack);
-      }
-    }
-
-    else if (command == "upr") {
-      auto p1 = split(instruction[1]);
-
-      for (int p = 0; p < p1.size(); p++) {
-        auto value = getValueOfSymbol(p1[p], memory, currentStack);
-        string str = "\"";
-        str.reserve(value.size() + 2);
-        for (auto val : value) {
-          str.push_back(toupper(static_cast<char>(val)));
-        }
-        str.push_back('"');
-        set(p1[p], str, memory, currentStack);
-      }
-    }
-
-    else if (command == "mid") {
-      // mid <start> <var> <end>
-      auto p1 = split(instruction[1]);
-      auto p2 = split(instruction[2]);
-      auto p3 = split(instruction[3]);
-      expandP2(p2, p1);
-      expandP2(p1, p2);
-      checkSizeP1P2(p1, p2);
-      checkSizeP1P2(p1, p3);
-
-      for (int p = 0; p < p1.size(); p++) {
-        auto start = getValueOfSymbol(p1[p], memory, currentStack)[0];
-        auto value = getValueOfSymbol(p2[p], memory, currentStack);
-        auto end = getValueOfSymbol(p3[p], memory, currentStack)[0];
-        end -= start;
-        string str;
-        for (auto val : value) {
-          if (val == 0) {
-            break;
-          }
-          str.push_back(static_cast<char>(val));
-        }
-        if (end < 0) {
-          end += str.length();
-        }
-        if (DEBUG) {
-          cout << "length of str = " << str.length() << endl;
-          cout << "str = " << str << endl;
-        }
-        str = str.substr(start, end);
-        str = "\"" + str + "\"";
-        set(p2[p], str, memory, currentStack);
-      }
-    }
-
-    else if (command == "len") {
-      // mid <start> <var> <nChar>
-      auto p1 = split(instruction[1]);
-      auto p2 = split(instruction[2]);
-      expandP2(p1, p2);
-      checkSizeP1P2(p1, p2);
-
-      for (int p = 0; p < p1.size(); p++) {
-        auto value = getValueOfSymbol(p1[p], memory, currentStack);
-        string str;
-        for (auto val : value) {
-          if (val == 0) {
-            break;
-          }
-          str.push_back(static_cast<char>(val));
-        }
-        set(p2[p], to_string(str.length()), memory, currentStack);
+        int value = getValueOfSymbol(p1[p], memory, currentStack);
+        cout << static_cast<char>(value);
       }
     }
 
@@ -635,7 +419,8 @@ int main(int argc, char *argv[]) {
       auto p1 = split(instruction[1]);
 
       for (int p = 0; p < p1.size(); p++) {
-        add(p1[p], "1", p1[p], memory, currentStack);
+        int value = getValueOfSymbol(p1[p], memory, currentStack);
+        set(p1[p], to_string(value + 1), memory, currentStack);
       }
     }
 
@@ -653,23 +438,6 @@ int main(int argc, char *argv[]) {
         string storeAt = p3[p];
 
         add(a, b, storeAt, memory, currentStack);
-      }
-    }
-
-    else if (command == "mult") {
-      auto p1 = split(instruction[1]);
-      auto p2 = split(instruction[2]);
-      auto p3 = split(instruction[3]);
-      expandP2(p1, p2);
-      checkSizeP1P2(p1, p2);
-      checkSizeP1P2(p1, p3);
-
-      for (int p = 0; p < p1.size(); p++) {
-        string a = p1[p];
-        string b = p2[p];
-        string storeAt = p3[p];
-
-        multiply(a, b, storeAt, memory, currentStack);
       }
     }
 
