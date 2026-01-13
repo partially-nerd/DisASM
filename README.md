@@ -1,5 +1,5 @@
 # DisASM
-A faster > ? < knock off of Lqpletsp/GALang. It's meant to replicate some behaviour of assembly, but is capable of performing multiple operations in the same clock-cycle due to the comma syntax, with the main difference from GALang being a slight change of syntax to make the interpreter a one-pass system, and that it's written in cpp
+A faster > ? < (;-; I just tried and it's slower lmfao) knock off of Lqpletsp/GALang. It's meant to replicate some behaviour of assembly, but is capable of performing multiple operations in the same clock-cycle due to the comma syntax, with the main difference from GALang being a slight change of syntax to make the interpreter a one-pass system, and that it's written in cpp
 
 ## Usage
 Build by running `./build.sh` in any POSIX-compliant shell with your working directory being the cloned directory.
