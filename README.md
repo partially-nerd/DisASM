@@ -7,7 +7,7 @@ Build by running `./build.sh` in any POSIX-compliant shell with your working dir
 > [!NOTE]
 > `build.sh` should warn you about unmet dependencies, and will create a build directory to store the compiled binaries.
 
-Run the demo file with `./build/src.main fib.slang`.
+Run the demo files with `./build/src.main ./examples/fib.slang` or `./build/src.main ./examples/strings.slang`.
 
 ## Sample Program and Explanation
 ```asm
@@ -19,7 +19,7 @@ decf fibo x, y, depth, maxD int
   set x, y y, m
 
   out m
-  outch space
+  outch delim
 
   // exit if depth 10
   // the second param to decl is the offset from l1 when labelling l1
@@ -28,13 +28,13 @@ decf fibo x, y, depth, maxD int
   call fibo x, y, depth, maxD
 endf
 
-decv space int
-set space 32
+decv delim str
+set delim ", "
 
 out 1
-outch space
+outch delim
 out 1
-outch space
+outch delim
 
 call fibo 1, 1, 1, 10
 
@@ -50,8 +50,10 @@ For general operations like add, set, out, outch, it performs the operations on 
 will add 2 to 1, 2, 3 and store them to x, y, z correspondingly.
 
 `decf` defines a function, and is ignored unless called explicitly using `call`. 
-
 `decl` defines a label, and the second parameter specifies the offset from the label's position. This is typically used along with `cmp{x}` to perform complex logic.
 
 > [!NOTE]
-> Currently, `outch` expects the ascii code of a character and displays that, but the behaviour will probably change as time passes.
+> Labels have been given offsets solely to make the system one-pass rather than two.
+
+> [!NOTE]
+> Previously, `outch` expected the ascii code of a character and displays that, which is why I've implemented strings as ascii value arrays. 
